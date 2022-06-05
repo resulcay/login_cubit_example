@@ -1,6 +1,10 @@
 # login_cubit_example
 
-A new Flutter project.
+---ScreenShots---
+
+<img src="assets/1.png" width="300"> | <img src="assets/2.png" width="300"> |
+
+Inspired On : https://www.youtube.com/watch?v=BOHOlOv7FaI
 
 ## Getting Started
 

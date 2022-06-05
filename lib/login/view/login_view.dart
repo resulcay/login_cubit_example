@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:login_cubit_example/login/service/login_service.dart';
 import 'package:login_cubit_example/login/viewmodel/login_cubit.dart';
 
 class LoginView extends StatelessWidget {
@@ -8,6 +10,7 @@ class LoginView extends StatelessWidget {
   final GlobalKey<FormState> formKey = GlobalKey();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
+  final String baseUrl = "https://reqres.in/api";
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
@@ -15,14 +18,31 @@ class LoginView extends StatelessWidget {
         formKey,
         passwordController,
         emailController,
+        service: LoginService(
+          Dio(
+            BaseOptions(baseUrl: baseUrl),
+          ),
+        ),
       ),
-      child: buildScaffold(context),
+      child: BlocConsumer<LoginCubit, LoginState>(
+        builder: (context, state) {
+          return buildScaffold(context, state);
+        },
+        listener: (context, state) {},
+      ),
     );
   }
 
-  Scaffold buildScaffold(BuildContext context) {
+  Scaffold buildScaffold(BuildContext context, LoginState state) {
     return Scaffold(
       appBar: AppBar(
+        leading: Visibility(
+            visible: context.watch<LoginCubit>().isLoading,
+            child: const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: CircularProgressIndicator(
+                  backgroundColor: Colors.amberAccent),
+            )),
         centerTitle: true,
         title: const Text(
           "Cubit Login",
@@ -30,7 +50,7 @@ class LoginView extends StatelessWidget {
       ),
       body: Form(
         key: formKey,
-        autovalidateMode: AutovalidateMode.disabled,
+        autovalidateMode: autovalidateMode(state),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
@@ -43,13 +63,23 @@ class LoginView extends StatelessWidget {
               height: MediaQuery.of(context).size.height * 0.02,
             ),
             ElevatedButton(
-              onPressed: () {},
+              onPressed: () {
+                context.read<LoginCubit>().postUserModel();
+              },
               child: const Text("Save"),
             )
           ],
         ),
       ),
     );
+  }
+
+  AutovalidateMode autovalidateMode(LoginState state) {
+    return state is LoginValidateState
+        ? (state.isValidate
+            ? AutovalidateMode.always
+            : AutovalidateMode.disabled)
+        : AutovalidateMode.disabled;
   }
 
   TextFormField buildTextFormFieldPassword() {
