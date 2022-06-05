@@ -37,7 +37,7 @@ class LoginCubit extends Cubit<LoginState> {
   }
 
   void changeLoadingView() {
-    isLoading != isLoading;
+    isLoading = !isLoading;
     emit(LoginLoadingState(isLoading));
   }
 }
